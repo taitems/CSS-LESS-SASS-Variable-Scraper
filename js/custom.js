@@ -12,8 +12,14 @@ var colorScript = (function() {
     // http://stackoverflow.com/questions/9682709/regexp-matching-hex-color-syntax-and-shorten-form
     var colorRegExp = new RegExp(/#[0-9a-f]{3,6}/g);
     var colorModel = [];
-    var originalInput = "";
-    var variablePrefix;
+    var model = {
+        inputStr: "",
+        outputStr: ""
+    };
+    var settings = {
+        precompiler: "less",
+        variablePrefix: "@"
+    };
 
     // bind events
     $(document).on("click", "#do", function() {
@@ -25,7 +31,7 @@ var colorScript = (function() {
                 height: "125px"
             }, {
                 duration: 200
-            })
+            });
         }
     });
     $(document).on("change", "#variables input[type=text]", function() {
@@ -37,14 +43,18 @@ var colorScript = (function() {
         renderText();
     });
     $(document).on("change", "[name=variable-type]", function() {
-        variablePrefix = $("[name=variable-type]:checked").val();
+        settings.variablePrefix = $("[name=variable-type]:checked").val();
+        settings.precompiler = $("[name=variable-type]:checked").attr("id");
         renderText();
+    });
+    $(document).on("click", "#downloadFile", function() {
+        var blob = new Blob([model.outputStr], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "output." + settings.precompiler);
     });
 
     var processInput = function(str) {
 
-        variablePrefix = $("[name=variable-type]:checked").val();
-        originalInput = str;
+        model.inputStr = str;
         colorModel = arrayWizardry(str.match(colorRegExp));
 
         hydrateVariableRows();
@@ -73,14 +83,15 @@ var colorScript = (function() {
     };
 
     var renderText = function() {
-        var str = originalInput;
+        var str = model.inputStr;
         $.each(colorModel, function(i,item) {
             if (item.replaceWith.length) {
                 var singleColorRegExp = new RegExp(item.color,"g");
-                str = str.replace(singleColorRegExp,variablePrefix + item.replaceWith);
-                str = variablePrefix + item.replaceWith + ": " + item.color + ";\n" + str;
+                str = str.replace(singleColorRegExp,settings.variablePrefix + item.replaceWith);
+                str = settings.variablePrefix + item.replaceWith + ": " + item.color + ";\n" + str;
             }
         });
+        model.outputStr = str;
         $("#text-output").text(str);
     };
 
@@ -105,7 +116,7 @@ var colorScript = (function() {
     var arrayWizardry = function(arr) {
 
         var a = [], b = [], prev;
-        
+
         arr.sort();
         for ( var i = 0; i < arr.length; i++ ) {
             if ( arr[i] !== prev ) {
@@ -116,7 +127,7 @@ var colorScript = (function() {
             }
             prev = arr[i];
         }
-        
+
         // build sub array
         var c = [];
         for (var j = 0; j < a.length; j++) {

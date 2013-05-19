@@ -12,7 +12,7 @@ textarea {
 		box-sizing: border-box;
 }
 #text-output {
-	margin-bottom: 5em;
+	margin-bottom: 1em;
 }
 
 
@@ -63,3 +63,32 @@ textarea {
 .dark-background {
 	color: #FFF;
 }
+
+
+/* === DOWNLOAD FILE === */
+#download-area {
+	text-align: right;
+	margin: 0 0 3em 0;
+}
+#download-area span {
+	display: inline-block;
+	margin-right: 15px;
+	color: #AAA;
+}
+
+
+/* === FOOTER === */
+footer {
+	text-align: center;
+	padding: 2em 0;
+	margin-top: 2em;
+}
+footer a:hover {
+	color: #333;
+}
+footer iframe {
+	vertical-align: middle;
+}
+		/* sneaky footer background fix */
+		html { background: #eceff1; }
+		body { background: #FFF; }

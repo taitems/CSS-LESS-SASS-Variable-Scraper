@@ -40,9 +40,30 @@
             <div id="variables" class="row"></div>
             <h2>Generated Output</h2>
             <textarea id="text-output" class=""></textarea>
+
+            <div id="download-area">
+              <span>
+                <strong>Note:</strong> Download functionality depends on browser support.
+              </span>
+              <button class="btn btn-large" id="downloadFile">Download File</button>
+            </div>
       </div>
 
     </div>
+
+    <footer>
+      <div class="container">
+        <p>
+          A quick experiment by <a href="http://taitbrown.com/">Tait Brown</a> (<a href="http://twitter.com/taitems/">@taitems</a>).
+        </p>
+        <p>
+          Support my open source endeavours on Gittip: &nbsp;&nbsp;
+        <iframe style="border: 0; margin: 0; padding: 0;"
+          src="https://www.gittip.com/taitems/widget.html"
+          width="48pt" height="22pt"></iframe>
+        </p>
+      </div>
+    </footer>
 
     <script id="color-repeater" type="html/template">
         <div>
@@ -56,6 +77,7 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/custom_checkbox_and_radio.js"></script>
     <script src="js/custom_radio.js"></script>
+    <script src="js/FileSaver.js"></script>
     <script src="js/custom.js"></script>
 
   </body>
