@@ -18,7 +18,8 @@ var colorScript = (function() {
     };
     var settings = {
         precompiler: "less",
-        variablePrefix: "@"
+        variablePrefix: "@",
+        ignoreBlackAndWhite: true
     };
 
     // bind events
@@ -26,12 +27,6 @@ var colorScript = (function() {
         var txt = $("#text-input").val();
         if (txt.length) {
             processInput(txt);
-            $("#output").fadeIn();
-            $("#text-input").animate({
-                height: "125px"
-            }, {
-                duration: 200
-            });
         }
     });
     $(document).on("change", "#variables input[type=text]", function() {
@@ -47,6 +42,16 @@ var colorScript = (function() {
         settings.precompiler = $("[name=variable-type]:checked").attr("id");
         renderText();
     });
+    $(document).on("change", "[name=toggleBlackWhite]", function() {
+        var ignoreOrAllow = $("[name=toggleBlackWhite]:checked").val();
+        if (ignoreOrAllow === "allow") {
+            settings.ignoreBlackAndWhite = false;
+        } else {
+            settings.ignoreBlackAndWhite = true;
+        }
+        hydrateVariableRows();
+        renderText();
+    });
     $(document).on("click", "#downloadFile", function() {
         var blob = new Blob([model.outputStr], {type: "text/plain;charset=utf-8"});
         saveAs(blob, "output." + settings.precompiler);
@@ -54,12 +59,28 @@ var colorScript = (function() {
 
     var processInput = function(str) {
 
+        var colorMatch = str.match(colorRegExp);
+
+        if (colorMatch === null) {
+            throwError("No colours were found");
+            return false;
+        }
+
         model.inputStr = str;
-        colorModel = arrayWizardry(str.match(colorRegExp));
+
+        colorModel = arrayWizardry(colorMatch);
 
         hydrateVariableRows();
 
         renderText();
+
+        // show the output/variables UI
+        $("#output").fadeIn();
+        $("#text-input").animate({
+            height: "125px"
+        }, {
+            duration: 200
+        });
 
     };
 
@@ -67,10 +88,22 @@ var colorScript = (function() {
         obj.html(obj.html().replace(selector,value));
     };
 
+    var isWhiteOrBlack = function(str) {
+        var lower = str.toLowerCase();
+        if (lower === "#fff" || lower === "#ffffff" || lower === "#000" || lower === "#000000") {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     var hydrateVariableRows = function() {
         $("#variables").empty();
         var tmplStr = $("#color-repeater").html();
         $.each(colorModel, function(i,item) {
+            if (settings.ignoreBlackAndWhite && isWhiteOrBlack(item.color)) {
+                return;
+            }
             var $newRow = $(tmplStr);
             tmpl($newRow,"{lightOrDark}",determineTextColor(item.color));
             tmpl($newRow,"{color}",item.color);
@@ -93,6 +126,11 @@ var colorScript = (function() {
         });
         model.outputStr = str;
         $("#text-output").text(str);
+    };
+
+    var throwError = function(str) {
+        var err = $('<div class="alert" />').text(str);
+        $("#errors").empty().append(err);
     };
 
     var determineTextColor = function(str) {

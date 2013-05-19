@@ -1,8 +1,13 @@
 /* === GENERAL === */
 h1, h2 {
-	border-bottom: 1px solid #EEE;
+	text-align: center;
 	padding: 1em 0 0.5em 0;
 	margin-bottom: 1em;
+}
+h1 img {
+	width: 60px;
+	display: inline-block;
+	margin-right: 0.25em;
 }
 textarea {
 	width: 100%;
@@ -62,6 +67,17 @@ textarea {
 }
 .dark-background {
 	color: #FFF;
+}
+.well > div {
+	vertical-align: top;
+	display: inline-block;
+	margin: 0 3em 0 0;
+}
+.top-label {
+	text-transform: uppercase;
+	font-size: 12px;
+	font-weight: bold;
+	color: #777;
 }
 
 

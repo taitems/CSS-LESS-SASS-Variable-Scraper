@@ -15,15 +15,19 @@
 
     <div class="container">
 
-      <h1>CSS Color Variable Identifier</h1>
+      <h1>
+        <img src="images/illustrations/colors.png">
+        CSS Color Variable Identifier
+      </h1>
+
+      <div id="errors"></div>
 
       <textarea id="text-input"></textarea>
-
 
       <fieldset class="well">
           <button id="do" class="btn btn-large">Generate</button>
           <div class="">
-            <label>Variable Prefix:</label>
+            <label class="top-label">Variable Prefix:</label>
             <label class="radio" for="less">
                 <input type="radio" name="variable-type" id="less" value="@" checked="checked">
                 LESS Variables
@@ -32,6 +36,15 @@
                 <input type="radio" name="variable-type" id="sass" value="$">
                 SASS Variables
             </label>
+          </div>
+          <div class="">
+            <label class="top-label">Ignore #FFF and #000:</label>
+            <div class="toggle">
+              <label class="toggle-radio" for="allowBlackWhite">ON</label>
+              <input type="radio" name="toggleBlackWhite" id="ignoreBlackWhite" value="ignore" checked="checked">
+              <label class="toggle-radio" for="ignoreBlackWhite">OFF</label>
+              <input type="radio" name="toggleBlackWhite" id="allowBlackWhite" value="allow">
+            </div>
           </div>
       </fieldset>
 
