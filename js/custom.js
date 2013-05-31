@@ -57,6 +57,21 @@ var colorScript = (function() {
         saveAs(blob, "output." + settings.precompiler);
     });
 
+    // handle file drops using Dropzone.js
+    new Dropzone("#text-input", {
+        url: "/",
+        clickable: false,
+        accept: function(file,done) {
+            var fileReader = new FileReader;
+            fileReader.onload = function(e) {
+                $("#text-input").val(e.target.result);
+                $("#do").click();
+            };
+            fileReader.readAsText(file);
+            return false;
+        }
+    });
+
     var processInput = function(str) {
 
         var colorMatch = str.match(colorRegExp);

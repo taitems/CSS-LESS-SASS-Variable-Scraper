@@ -81,6 +81,13 @@ textarea {
 }
 
 
+
+/* === DROP FILE === */
+.dz-message {
+	opacity: .25;
+}
+
+
 /* === DOWNLOAD FILE === */
 #download-area {
 	text-align: right;
