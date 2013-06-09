@@ -1,4 +1,4 @@
-/*global $*/
+/*global $,FileReader*/
 /*jshint unused:false*/
 
 // dev only test string
@@ -19,6 +19,7 @@ var colorScript = (function() {
     var settings = {
         precompiler: "less",
         variablePrefix: "@",
+        sortBy: "usage",
         ignoreBlackAndWhite: true
     };
 
@@ -42,6 +43,18 @@ var colorScript = (function() {
         settings.precompiler = $("[name=variable-type]:checked").attr("id");
         renderText();
     });
+    $(document).on("change", "[name=sort-by]", function() {
+        settings.sortBy = $("[name=sort-by]:checked").attr("id");
+        if (model.inputStr === "") {
+            return;
+        }
+        if (settings.sortBy === "usage") {
+            sortByUsage(colorModel);
+        } else {
+            sortByHue(colorModel);
+        }
+        hydrateVariableRows();
+    });
     $(document).on("change", "[name=toggleBlackWhite]", function() {
         var ignoreOrAllow = $("[name=toggleBlackWhite]:checked").val();
         if (ignoreOrAllow === "allow") {
@@ -62,7 +75,7 @@ var colorScript = (function() {
         url: "/",
         clickable: false,
         accept: function(file,done) {
-            var fileReader = new FileReader;
+            var fileReader = new FileReader();
             fileReader.onload = function(e) {
                 $("#text-input").val(e.target.result);
                 $("#do").click();
@@ -116,13 +129,13 @@ var colorScript = (function() {
         $("#variables").empty();
         var tmplStr = $("#color-repeater").html();
         $.each(colorModel, function(i,item) {
-            if (settings.ignoreBlackAndWhite && isWhiteOrBlack(item.color)) {
+            if (settings.ignoreBlackAndWhite && isWhiteOrBlack(item.color.hex)) {
                 return;
             }
             var $newRow = $(tmplStr);
-            tmpl($newRow,"{lightOrDark}",determineTextColor(item.color));
-            tmpl($newRow,"{color}",item.color);
-            tmpl($newRow,"{colorValue}",item.color);
+            tmpl($newRow,"{lightOrDark}",determineTextColor(item.color.hex));
+            tmpl($newRow,"{color}",item.color.hex);
+            tmpl($newRow,"{colorValue}",item.color.hex);
             tmpl($newRow,"{count}",item.count);
             tmpl($newRow,"{plural?}",(item.count > 1) ? "uses" : "use");
             $newRow.data("color",item);
@@ -134,9 +147,9 @@ var colorScript = (function() {
         var str = model.inputStr;
         $.each(colorModel, function(i,item) {
             if (item.replaceWith.length) {
-                var singleColorRegExp = new RegExp(item.color,"g");
+                var singleColorRegExp = new RegExp(item.color.hex,"g");
                 str = str.replace(singleColorRegExp,settings.variablePrefix + item.replaceWith);
-                str = settings.variablePrefix + item.replaceWith + ": " + item.color + ";\n" + str;
+                str = settings.variablePrefix + item.replaceWith + ": " + item.color.hex + ";\n" + str;
             }
         });
         model.outputStr = str;
@@ -185,7 +198,7 @@ var colorScript = (function() {
         var c = [];
         for (var j = 0; j < a.length; j++) {
           var obj = {
-            color: a[j],
+            color: hexToHSL(a[j]),
             count: b[j],
             include: true,
             replaceWith: ""
@@ -193,12 +206,72 @@ var colorScript = (function() {
           c.push(obj);
         }
 
-        // sort highest occurance to lowest
-        c = c.sort(function (a, b) {
-            return b.count - a.count;
-        });
+        // sort array depending on settings
+        if (settings.sortBy === "usage") {
+            c = sortByUsage(c);
+        } else {
+            c = sortByHue(c);
+        }
 
         return c;
+
+    };
+
+    var sortByUsage = function(arr) {
+        var a = arr.sort(function (a,b) {
+            return b.count - a.count;
+        });
+        return a;
+    };
+
+    var sortByHue = function(arr) {
+        var a = arr.sort(function(a,b) {
+            return b.color.hue - a.color.hue;
+        });
+        return a;
+    };
+
+    var hexToHSL = function(color) {
+
+        /* Get the hex value without hash symbol. */
+        var hex = color.substring(1);
+
+        /* Get the RGB values to calculate the Hue. */
+        var r = parseInt(hex.substring(0,2),16)/255;
+        var g = parseInt(hex.substring(2,4),16)/255;
+        var b = parseInt(hex.substring(4,6),16)/255;
+
+        /* Getting the Max and Min values for Chroma. */
+        var max = Math.max.apply(Math, [r,g,b]);
+        var min = Math.min.apply(Math, [r,g,b]);
+
+        /* Variables for HSV value of hex color. */
+        var chr = max-min;
+        var hue = 0;
+        var val = max;
+        var sat = 0;
+
+        if (val > 0) {
+            /* Calculate Saturation only if Value isn't 0. */
+            sat = chr/val;
+            if (sat > 0) {
+                if (r == max) {
+                    hue = 60*(((g-min)-(b-min))/chr);
+                    if (hue < 0) {hue += 360;}
+                } else if (g == max) {
+                    hue = 120+60*(((b-min)-(r-min))/chr);
+                } else if (b == max) {
+                    hue = 240+60*(((r-min)-(g-min))/chr);
+                }
+            }
+        }
+
+        return {
+            hex: color,
+            hue: hue,
+            sat: sat,
+            val: val
+        };
 
     };
 
